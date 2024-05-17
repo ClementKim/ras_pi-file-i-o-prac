@@ -1,4 +1,4 @@
-#include <sys.stat.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -74,7 +74,7 @@ static int GPIODirection(int pin, int dir){
     return 0;
 }
 
-static int GPIORead_btn(int pin){
+static int GPIORead(int pin){
     char path[VALUE_MAX];
     char value_str[3];
     int fd;
@@ -96,7 +96,8 @@ static int GPIORead_btn(int pin){
     return atoi(value_str);
 }
 
-static int GPIOWrite_LED(int pin, int value){
+
+static int GPIOWrite(int pin, int value){
     static const char s_values_str[] = "01";
 
     char path[VALUE_MAX];
@@ -120,7 +121,7 @@ static int GPIOWrite_LED(int pin, int value){
 }
 
 int main(int argc, char *argv[]){
-    int repeat = 1000;
+    int repeat = 100;
     int state = 1;
     int prev_state = 1;
     int light = 1;
@@ -128,15 +129,21 @@ int main(int argc, char *argv[]){
     if (-1 == GPIOExport(BTN_POUT2) || -1 == GPIOExport(BTN_PIN) || -1 == GPIOExport(LED_POUT))
         return 1;
 
-    if (-1 == GPIODirection(BTN_POUT2, OUT) || -1 == GPIODirection(BTN_PIN, IN) || -1 == GPIODirection(LED_POUT))
+    if (-1 == GPIODirection(BTN_POUT2, OUT) || -1 == GPIODirection(BTN_PIN, IN))
+        return 2;
+
+    if (-1 == GPIODirection(LED_POUT, OUT))
         return 2;
 
     do {
-        if (-1 == GPIOWrite(BTN_POUT2, 1) || -1 == GPIOWrite(LED_POUT, BTN_POUT2 || -1 == GPIOWrite(LED_POUT, BTN_PIN)))
+        if (-1 == GPIOWrite(BTN_POUT2, 1))
             return 3;
 
-            printf("GPIORead : %d from pin %d\n", GPIORead(BTN_PIN), BTN_PIN);
-            usleep(100000);
+        if (-1 == GPIOWrite(LED_POUT, !GPIORead(BTN_PIN)))
+            return 3;
+
+        printf("GPIORead : %d from pin %d\n", GPIORead(BTN_PIN), BTN_PIN);
+        usleep(100000);
      }
      while (repeat--);
 
