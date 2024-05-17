@@ -82,7 +82,7 @@ static int GPIORead(int pin){
     snprintf(path, VALUE_MAX, "/sys/class/gpio/gpio%d/value", pin);
     fd = open(path, O_RDONLY);
     if (-1 == fd){
-        fprintf(stderr, "Failed to oprn gpio value for reading!\n");
+        fprintf(stderr, "Failed to open gpio value for reading!\n");
         return -1;
     }
 
